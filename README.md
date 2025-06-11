@@ -2,7 +2,7 @@
 
 Preview your `.qmd` file in VSCode, like markdown.
 
-![Preview](./preview.png)
+![Preview](imgs/preview.png)
 
 ## Features
 

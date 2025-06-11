@@ -3,6 +3,6 @@
   <circle cx="64" cy="64" r="60" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
 
     <!-- 粗体 Q 字母 -->
-  <text x="64" y="64" font-family="Roboto, sans-serif" font-size="80" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">Q</text>
+  <text x="64" y="92" font-family="Roboto, sans-serif" font-size="80" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="auto">Q</text>
 
 </svg>
