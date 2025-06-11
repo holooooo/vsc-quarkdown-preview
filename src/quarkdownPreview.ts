@@ -546,17 +546,41 @@ export class QuarkdownPreviewManager {
                 }
             });
         } else {
-            vscode.window.showErrorMessage(
-                `Quarkdown preview failed: ${errorMessage}`,
-                'View Details',
-                'Check Installation'
-            ).then(selection => {
-                if (selection === 'View Details') {
-                    this.showDetailedError(errorMessage, filePath);
-                } else if (selection === 'Check Installation') {
-                    this.checkQuarkdownInstallation();
-                }
-            });
+            // 检查是否是安装或路径配置问题
+            const isInstallationIssue = errorMessage.includes('ENOENT') ||
+                errorMessage.includes('command not found') ||
+                errorMessage.includes('Failed to start') ||
+                errorMessage.includes('spawn') ||
+                errorMessage.includes('No such file');
+
+            if (isInstallationIssue) {
+                vscode.window.showErrorMessage(
+                    `❌ Quarkdown not found. Please check installation and path configuration.`,
+                    'Installation Guide',
+                    'Check Settings',
+                    'View Details'
+                ).then(selection => {
+                    if (selection === 'Installation Guide') {
+                        vscode.env.openExternal(vscode.Uri.parse('https://github.com/iamgio/quarkdown?tab=readme-ov-file#installation'));
+                    } else if (selection === 'Check Settings') {
+                        vscode.commands.executeCommand('workbench.action.openSettings', 'quarkdownPreview.quarkdownPath');
+                    } else if (selection === 'View Details') {
+                        this.showDetailedError(errorMessage, filePath);
+                    }
+                });
+            } else {
+                vscode.window.showErrorMessage(
+                    `Quarkdown preview failed: ${errorMessage}`,
+                    'View Details',
+                    'Check Installation'
+                ).then(selection => {
+                    if (selection === 'View Details') {
+                        this.showDetailedError(errorMessage, filePath);
+                    } else if (selection === 'Check Installation') {
+                        this.checkQuarkdownInstallation();
+                    }
+                });
+            }
         }
     }
 
@@ -612,26 +636,18 @@ export class QuarkdownPreviewManager {
         validateQuarkdownInstallation().then(isInstalled => {
             if (!isInstalled) {
                 vscode.window.showErrorMessage(
-                    'Quarkdown is not properly installed. Please check installation and configuration',
-                    'Open Installation Guide',
+                    '❌ Quarkdown installation not detected. Please check installation and configuration.',
+                    'Installation Guide',
                     'Open Settings'
                 ).then(selection => {
-                    if (selection === 'Open Installation Guide') {
-                        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-                        if (workspaceFolder) {
-                            const installFilePath = path.join(workspaceFolder.uri.fsPath, 'INSTALL.md');
-                            if (fs.existsSync(installFilePath)) {
-                                vscode.workspace.openTextDocument(installFilePath).then(doc => {
-                                    vscode.window.showTextDocument(doc);
-                                });
-                            }
-                        }
+                    if (selection === 'Installation Guide') {
+                        vscode.env.openExternal(vscode.Uri.parse('https://github.com/iamgio/quarkdown?tab=readme-ov-file#installation'));
                     } else if (selection === 'Open Settings') {
                         vscode.commands.executeCommand('workbench.action.openSettings', 'quarkdownPreview.quarkdownPath');
                     }
                 });
             } else {
-                vscode.window.showInformationMessage('Quarkdown installation is normal, this might be a file syntax issue');
+                vscode.window.showInformationMessage('✅ Quarkdown installation detected. This might be a syntax issue.');
             }
         });
     }
@@ -778,9 +794,13 @@ export class QuarkdownPreviewManager {
                     <p id="error-message-details">An unknown error occurred.</p>
                     <div class="error-details">
                         <strong>Common causes:</strong><br>
-                        • Quarkdown is not properly installed or path configuration is incorrect<br>
+                        • Quarkdown not installed or path misconfigured<br>
                         • .qmd file contains syntax errors<br>
-                        • Insufficient permissions to read/write temporary directory
+                        • Insufficient permissions for temp directory<br><br>
+                        <strong>Solutions:</strong><br>
+                        1. Install Quarkdown: <a href="https://github.com/iamgio/quarkdown?tab=readme-ov-file#installation" target="_blank">Installation Guide</a><br>
+                        2. Check quarkdownPath in VS Code settings<br>
+                        3. Verify .qmd file syntax
                     </div>
                     <button class="retry-button" onclick="vscode.postMessage({ command: 'retry' })">
                         Retry
