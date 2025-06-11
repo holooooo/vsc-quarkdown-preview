@@ -1,23 +1,85 @@
 {
   "name": "quarkdown-preview",
-  "displayName": "quarkdown-preview",
-  "description": "Preview your .qmd file in vsc, like markdown",
-  "version": "0.0.1",
+  "displayName": "Quarkdown Preview",
+  "description": "Preview your .qmd file in VSCode",
+  "version": "0.1.0",
+  "publisher": "holooooo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holooooo/vsc-quarkdown-preview.git"
+  },
+  "bugs": {
+    "url": "https://github.com/holooooo/vsc-quarkdown-preview/issues"
+  },
+  "homepage": "https://github.com/holooooo/vsc-quarkdown-preview#readme",
   "engines": {
     "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "keywords": [
+    "quarkdown",
+    "qmd",
+    "markdown",
+    "render",
+    "preview"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "quarkdown-preview.helloWorld",
-        "title": "Hello World"
+        "command": "quarkdown-preview.openPreviewToSide",
+        "title": "Open Preview to the Side",
+        "category": "Quarkdown",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "quarkdown-preview.createProject",
+        "title": "Create New Project",
+        "category": "Quarkdown",
+        "icon": "$(add)"
+      },
+      {
+        "command": "quarkdown-preview.compile",
+        "title": "Compile Document to HTML",
+        "category": "Quarkdown",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "quarkdown-preview.compileToPdf",
+        "title": "Compile Document to PDF",
+        "category": "Quarkdown",
+        "icon": "$(file-pdf)"
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceExtname == .qmd",
+          "command": "quarkdown-preview.openPreviewToSide",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Quarkdown Preview",
+      "properties": {
+        "quarkdownPreview.quarkdownPath": {
+          "type": "string",
+          "default": "quarkdown",
+          "description": "Path to the Quarkdown executable. If Quarkdown is in PATH, you can just use 'quarkdown'."
+        },
+        "quarkdownPreview.outputDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Compilation output directory (empty value means using system temporary directory)"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
