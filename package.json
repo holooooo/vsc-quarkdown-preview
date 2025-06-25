@@ -2,7 +2,7 @@
   "name": "quarkdown-preview",
   "displayName": "Quarkdown Preview",
   "description": "Preview your .qmd file in VSCode",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "holooooo",
   "icon": "imgs/icon.png",
   "repository": {
@@ -60,7 +60,7 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceExtname == .qmd",
+          "when": "resourceExtname == .qmd || resourceExtname == .qd",
           "command": "quarkdown-preview.openPreviewToSide",
           "group": "navigation"
         }

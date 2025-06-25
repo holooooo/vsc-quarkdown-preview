@@ -11,3 +11,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.1.2] - 2025-06-11
 
 - Better error message for Quarkdown installation not detected
+
+## [0.1.3] - 2025-06-25
+
+- Add support for **.qd** files

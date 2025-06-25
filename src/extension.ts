@@ -78,8 +78,8 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			const document = activeEditor.document;
-			if (!document.fileName.endsWith('.qmd')) {
-				vscode.window.showInformationMessage('Current file is not a .qmd file');
+			if (!document.fileName.endsWith('.qmd') && !document.fileName.endsWith('.qd')) {
+				vscode.window.showInformationMessage('Current file is not a .qmd or .qd file');
 				return;
 			}
 
@@ -104,8 +104,8 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			const document = activeEditor.document;
-			if (!document.fileName.endsWith('.qmd')) {
-				vscode.window.showInformationMessage('Current file is not a .qmd file');
+			if (!document.fileName.endsWith('.qmd') && !document.fileName.endsWith('.qd')) {
+				vscode.window.showInformationMessage('Current file is not a .qmd or .qd file');
 				return;
 			}
 
@@ -144,8 +144,8 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			const document = activeEditor.document;
-			if (!document.fileName.endsWith('.qmd')) {
-				vscode.window.showInformationMessage('Current file is not a .qmd file');
+			if (!document.fileName.endsWith('.qmd') && !document.fileName.endsWith('.qd')) {
+				vscode.window.showInformationMessage('Current file is not a .qmd or .qd file');
 				return;
 			}
 
@@ -170,8 +170,8 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			const document = activeEditor.document;
-			if (!document.fileName.endsWith('.qmd')) {
-				vscode.window.showInformationMessage('Current file is not a .qmd file');
+			if (!document.fileName.endsWith('.qmd') && !document.fileName.endsWith('.qd')) {
+				vscode.window.showInformationMessage('Current file is not a .qmd or .qd file');
 				return;
 			}
 
@@ -187,7 +187,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Listen for document save events to auto-update preview
 	const onDocumentSaveDisposable = vscode.workspace.onDidSaveTextDocument(async (document) => {
-		if (document.fileName.endsWith('.qmd')) {
+		if (document.fileName.endsWith('.qmd') || document.fileName.endsWith('.qd')) {
 			// Recompile preview if this document's preview is open
 			await previewManager.recompileForPreview(document);
 		}
@@ -195,7 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Listen for active editor changes
 	const onActiveEditorChangeDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
-		if (editor && editor.document.fileName.endsWith('.qmd')) {
+		if (editor && (editor.document.fileName.endsWith('.qmd') || editor.document.fileName.endsWith('.qd'))) {
 			// Could add status bar info or other UI updates here
 		}
 	});
@@ -205,7 +205,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const updateStatusBar = () => {
 		const activeEditor = vscode.window.activeTextEditor;
-		if (activeEditor && activeEditor.document.fileName.endsWith('.qmd')) {
+		if (activeEditor && (activeEditor.document.fileName.endsWith('.qmd') || activeEditor.document.fileName.endsWith('.qd'))) {
 			statusBarItem.text = '$(open-preview) Quarkdown';
 			statusBarItem.tooltip = 'Click to preview current Quarkdown file';
 			statusBarItem.command = 'quarkdown-preview.openPreviewToSide';
