@@ -15,3 +15,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.1.3] - 2025-06-25
 
 - Add support for **.qd** files
+
+## [0.1.4] - 2025-06-25
+
+- Support reload preview by clicking the reload button in the preview view, in case the preview is not the latest version when others dependencies are updated.

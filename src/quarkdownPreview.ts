@@ -55,6 +55,28 @@ export class QuarkdownPreviewManager {
 
         panel.webview.html = this.getWebviewContent();
 
+        // 处理来自webview的消息
+        panel.webview.onDidReceiveMessage(async (message) => {
+            switch (message.command) {
+                case 'refreshPreview':
+                    try {
+                        panel.webview.postMessage({ command: 'refreshStart' });
+                        await this.recompileForPreview(document);
+                        panel.webview.postMessage({ command: 'refreshComplete' });
+                    } catch (error) {
+                        panel.webview.postMessage({ command: 'refreshComplete' });
+                        this.handlePreviewError(error, filePath);
+                    }
+                    break;
+                case 'retry':
+                    // 重新启动预览流程
+                    this.startPreviewInBackground(document, panel).catch(error => {
+                        this.handlePreviewError(error, filePath);
+                    });
+                    break;
+            }
+        });
+
         panel.onDidDispose(() => {
             this.webviewPanels.delete(filePath);
             this.stopProcess(filePath);
@@ -782,9 +804,49 @@ export class QuarkdownPreviewManager {
                         cursor: pointer;
                         font-size: 14px;
                     }
+                    .refresh-button {
+                        position: fixed;
+                        top: 15px;
+                        right: 15px;
+                        z-index: 1000;
+                        padding: 8px 16px;
+                        background: var(--vscode-button-background);
+                        color: var(--vscode-button-foreground);
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 12px;
+                        font-weight: 500;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                        transition: all 0.2s ease;
+                        display: none;
+                    }
+                    .refresh-button:hover {
+                        background: var(--vscode-button-hoverBackground);
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                    }
+                    .refresh-button:active {
+                        transform: translateY(0);
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                    }
+                    .refresh-button.refreshing {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                    }
+                    .refresh-icon {
+                        display: inline-block;
+                        transition: transform 0.3s ease;
+                    }
+                    .refresh-button.refreshing .refresh-icon {
+                        animation: spin 1s linear infinite;
+                    }
                 </style>
             </head>
             <body>
+                <button class="refresh-button" id="refreshButton">
+                    <span class="refresh-icon">🔄</span>
+                </button>
                 <div class="loading" id="loading">
                     <div class="loading-spinner"></div>
                     <div id="loading-message">Preparing preview environment...</div>
@@ -815,6 +877,27 @@ export class QuarkdownPreviewManager {
                     const loadingMessage = document.getElementById('loading-message');
                     const error = document.getElementById('error');
                     const errorMessageDetails = document.getElementById('error-message-details');
+                    const refreshButton = document.getElementById('refreshButton');
+                    const refreshText = document.querySelector('.refresh-text');
+
+                    // 刷新按钮状态管理
+                    function setRefreshButtonState(isRefreshing) {
+                        if (refreshButton) {
+                            if (isRefreshing) {
+                                refreshButton.classList.add('refreshing');
+                                refreshButton.disabled = true;
+                                if (refreshText) {
+                                    refreshText.textContent = 'Refreshing...';
+                                }
+                            } else {
+                                refreshButton.classList.remove('refreshing');
+                                refreshButton.disabled = false;
+                                if (refreshText) {
+                                    refreshText.textContent = 'Refresh Now';
+                                }
+                            }
+                        }
+                    }
 
                     window.addEventListener('message', event => {
                         const message = event.data;
@@ -823,6 +906,7 @@ export class QuarkdownPreviewManager {
                                 loading.style.display = 'flex';
                                 error.style.display = 'none';
                                 iframe.style.display = 'none';
+                                refreshButton.style.display = 'none';
                                 if (loadingMessage) {
                                     loadingMessage.textContent = message.text;
                                 }
@@ -831,12 +915,15 @@ export class QuarkdownPreviewManager {
                                 loading.style.display = 'none';
                                 error.style.display = 'none';
                                 iframe.style.display = 'block';
+                                refreshButton.style.display = 'block';
                                 iframe.src = message.url;
+                                setRefreshButtonState(false);
                                 break;
                             case 'showError':
                                 loading.style.display = 'none';
                                 error.style.display = 'flex';
                                 iframe.style.display = 'none';
+                                refreshButton.style.display = 'none';
                                 if (errorMessageDetails) {
                                     errorMessageDetails.textContent = message.text;
                                 }
@@ -847,9 +934,26 @@ export class QuarkdownPreviewManager {
                                     iframe.src = 'about:blank';
                                     setTimeout(() => { iframe.src = iframeSrc; }, 100);
                                 }
+                                setRefreshButtonState(false);
+                                break;
+                            case 'refreshStart':
+                                setRefreshButtonState(true);
+                                break;
+                            case 'refreshComplete':
+                                setRefreshButtonState(false);
                                 break;
                         }
                     });
+
+                    // 处理刷新按钮点击
+                    if (refreshButton) {
+                        refreshButton.addEventListener('click', () => {
+                            if (!refreshButton.disabled) {
+                                setRefreshButtonState(true);
+                                vscode.postMessage({ command: 'refreshPreview' });
+                            }
+                        });
+                    }
 
                     // Handle retry button
                     const retryButton = document.querySelector('.retry-button');

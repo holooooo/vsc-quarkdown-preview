@@ -2,7 +2,7 @@
   "name": "quarkdown-preview",
   "displayName": "Quarkdown Preview",
   "description": "Preview your .qmd file in VSCode",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "holooooo",
   "icon": "imgs/icon.png",
   "repository": {
